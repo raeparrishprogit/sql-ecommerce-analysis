@@ -11,3 +11,4 @@ SELECT category, orders_containing_category, ROUND(sales_brl, 2) AS sales_brl,
        DENSE_RANK() OVER (ORDER BY sales_brl DESC) AS sales_rank
 FROM categories ORDER BY sales_rank, category;
 -- An order can contain multiple categories; category order counts are not additive.
+

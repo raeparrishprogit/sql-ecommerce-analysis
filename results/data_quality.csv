@@ -1,0 +1,8 @@
+check_name,affected_records
+duplicate_item_keys,0
+items_without_orders,0
+items_without_products,0
+orders_without_customers,0
+delivered_orders_without_items,0
+delivered_orders_missing_dates,8
+missing_or_nonpositive_item_prices,0

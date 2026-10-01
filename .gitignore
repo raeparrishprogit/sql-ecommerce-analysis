@@ -1,7 +1,9 @@
 data/raw/*
 !data/raw/.gitkeep
 data/*.sqlite
-results/
+results/customer_rfm.csv
+charts/*.png
 __pycache__/
+.ipynb_checkpoints/
 .venv/
 .env

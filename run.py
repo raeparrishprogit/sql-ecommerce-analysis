@@ -30,6 +30,8 @@ def main():
             bad = con.execute(f'SELECT "{key}" FROM "{table}" GROUP BY "{key}" HAVING COUNT(*) > 1 OR "{key}" IS NULL LIMIT 1').fetchone()
             if bad:
                 raise ValueError(f"Missing or duplicate {table}.{key}; repair before joining.")
+        for table, key in (("orders", "order_id"), ("order_items", "order_id"), ("customers", "customer_id"), ("products", "product_id"), ("order_reviews", "order_id")):
+            con.execute(f'CREATE INDEX IF NOT EXISTS "idx_{table}_{key}" ON "{table}" ("{key}")')
         for query in sorted((ROOT / "sql").glob("*.sql")):
             cursor = con.execute(query.read_text(encoding="utf-8"))
             with (output / (query.stem + ".csv").replace("00_data_quality", "data_quality")).open("w", encoding="utf-8", newline="") as stream:

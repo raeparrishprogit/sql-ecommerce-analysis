@@ -19,3 +19,4 @@ SELECT state, COUNT(*) AS eligible_delivered_orders, SUM(late) AS late_orders,
        COUNT(CASE WHEN late = 0 THEN score END) AS reviewed_on_time_orders,
        ROUND(AVG(CASE WHEN late = 0 THEN score END), 2) AS on_time_review_score
 FROM eligible GROUP BY state ORDER BY late_delivery_pct DESC;
+

@@ -15,3 +15,4 @@ SELECT month, delivered_orders, ROUND(sales_brl, 2) AS sales_brl,
        ROUND(sales_brl / NULLIF(delivered_orders, 0), 2) AS average_order_value_brl,
        ROUND(100.0 * (sales_brl / NULLIF(prior_observed_month_sales, 0) - 1), 2) AS change_pct
 FROM compared ORDER BY month;
+

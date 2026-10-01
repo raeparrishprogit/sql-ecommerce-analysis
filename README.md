@@ -1,40 +1,68 @@
-# E-commerce Sales and Delivery Analysis
-**Status: starter project / work in progress.** The workflow is implemented; real-data results and business recommendations have not yet been produced.
+# E-commerce Sales & Delivery Performance
 
-## Business question
-Which product categories and regions drive sales, and where are delivery problems associated with weaker customer reviews?
+A completed SQL portfolio case study using **99,441 real Olist orders** to examine merchandise sales, delivery reliability, and customer reviews.
 
-## Data
-Download the [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) and extract its CSV files into `data/raw/`. Keep original filenames. Follow the dataset's license and attribution requirements; raw data is not included in this repository.
+**Main finding:** late deliveries represent 6.77% of eligible delivered orders and have an average review score of 2.27/5, compared with 4.29/5 for on-time deliveries. This is an association, not a causal estimate.
 
-Required files: orders, order_items, customers, products, and order_reviews CSVs (each prefixed `olist_` and suffixed `_dataset.csv`).
+## Business decision
+Where should an e-commerce operations team investigate delivery problems, while monitoring sales performance?
 
-## Run
-Install Python 3.10 or newer. This project uses SQLite through Python's standard library; no extra packages or database server are required.
+**Recommended starting point:** investigate delivery lanes serving Rio de Janeiro (RJ): 1,495 late orders among 12,350 eligible deliveries (12.11%). Sao Paulo (SP) has more late orders (1,820), but a lower rate (4.49% across 40,494 deliveries). Examine both operational volume and failure rate before allocating resources.
 
-From this repository's folder:
+## Results at a glance
+
+| Metric | Result | Definition |
+|---|---:|---|
+| Delivered orders | 96,478 | Delivered status with item records |
+| Merchandise value | R$13,221,498.11 | Sum of delivered item prices; excludes freight |
+| Average order value | R$137.04 | Merchandise value / delivered orders |
+| Late delivery rate | 6.77% | 6,534 / 96,470 delivered orders with both dates |
+| Late-order review score | 2.27 / 5 | 6,381 reviewed late orders |
+| On-time review score | 4.29 / 5 | 89,443 reviewed on-time orders |
+
+### Sales pattern
+![Monthly merchandise sales](charts/monthly_sales.svg)
+
+The reviewed trend peaks in November 2017 at R$987,765.37. The chart shows January 2017–August 2018 to avoid sparse opening months. The final month may be incomplete; no causal event or current-market inference is attached to the pattern.
+
+### Product mix
+![Leading product categories](charts/category_sales.svg)
+
+Health & Beauty leads with R$1,233,131.72. The five largest categories contribute 39.83% of delivered merchandise value. Sales do not establish profitability because product costs and marketplace commissions are unavailable.
+
+### Delivery priorities
+![Late delivery by state](charts/delivery_states.svg)
+
+State abbreviations follow Brazil's standard state codes. Full state metrics, including small-volume states, remain in the result table. RJ combines substantial volume and a rate above the overall 6.77%; SP remains important because its absolute late-order count is largest.
+
+### Customer experience
+![Delivery and review scores](charts/delivery_reviews.svg)
+
+62.36% of reviewed late orders have an order-average score of 2 or less, versus 9.23% of reviewed on-time orders. Product mix, sellers, geography, review timing, and customer selection may also explain differences.
+
+## Explore the work
+- [Executed analysis notebook](analysis.ipynb)
+- [Detailed findings and recommendations](docs/findings.md)
+- [Methods and data quality](docs/methodology.md)
+- [Interview walkthrough](docs/interview-guide.md)
+- [Aggregate result tables](results/)
+- [Validation record](docs/validation.md)
+- [Python customer case study](https://github.com/raeparrishprogit/python-customer-analysis)
+
+## Reproduce
+Python 3.12 was used. From the repository folder:
+
 ```sh
-python run.py
+python -m pip install -r requirements.txt
+python download_data.py
+python build_portfolio.py
 ```
-The command builds `data/portfolio.sqlite` and exports query results into `results/`. Review `data_quality.csv` before interpreting the other outputs. Re-running replaces these generated files.
 
-## SQL skills
-Joins, CTEs, CASE expressions, window functions, grouped metrics, date calculations, and table-grain validation.
+The final command rebuilds SQLite tables, executes all seven SQL files, independently reconciles key metrics with pandas, and regenerates aggregate CSVs and SVG/PNG charts. Open `analysis.ipynb` in Jupyter or VS Code and run all cells to rebuild its outputs. For only the SQL outputs, `python run.py` uses Python's standard library.
 
-## Questions and outputs
-- `01_monthly_sales.sql`: monthly delivered-order sales, order count, average order value, and change from the prior observed month.
-- `02_category_sales.sql`: product-category sales and rankings.
-- `03_delivery_reviews.sql`: late-delivery rate by customer state, with review scores split by delivery status.
-- `00_data_quality.sql`: duplicate keys and missing/unmatched data checks.
+## SQL implementation
+Seven focused queries demonstrate joins, CTEs, CASE expressions, date functions, grouped metrics, window functions, and validation. Item prices and reviews are aggregated before joining where required to preserve order grain. Indexes accelerate joins; duplicate customer, product, and order keys stop the build.
 
-## Metric definitions
-Sales = sum of item prices for delivered orders, excluding freight; this is merchandise value in BRL, not profit or Olist's platform revenue.
-Average order value = merchandise value / delivered orders with item records.
-Late = actual delivery calendar date after estimated delivery calendar date. Rate denominator includes only delivered orders with both dates.
-Review score = first averaged within each order, then averaged across reviewed orders.
-The monthly comparison uses the prior observed month; investigate missing months and incomplete boundary months before treating it as month-over-month growth.
-
-## Table relationships
 ```mermaid
 erDiagram
     customers ||--o{ orders : customer_id
@@ -42,14 +70,8 @@ erDiagram
     products ||--o{ order_items : product_id
     orders ||--o{ order_reviews : order_id
 ```
-Item totals and reviews are aggregated to one row per order before joining. This avoids multiplying sales when an order has several items or reviews. Customer and product keys must be unique.
 
-## Finish the portfolio case study
-1. Download the data and run the workflow.
-2. Investigate every nonzero quality check; document exclusions or repairs.
-3. Reconcile item sales against order totals.
-4. Build three charts from the output CSVs (Excel, Power BI, or Tableau).
-5. Complete [the findings worksheet](docs/findings.md) with actual numbers and limitations.
-6. Add chart images and a concise business recommendation to this README.
+## Source and scope
+[Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), downloaded October 1, 2026. Source orders span September 4, 2016–October 17, 2018. Olist's category translation file supplies chart labels. The dataset is historical; results describe this extract, not today's business. See the source's CC BY-NC-SA 4.0 terms for data reuse. Raw data is not redistributed here; fingerprints are in `results/summary.json`.
 
-Delivery and review relationships are observational, not evidence that lateness alone caused a rating change. Dataset history is not a statement about current market conditions.
+Prepared with AI assistance; calculations were executed and checked against the full source data. This is an independent portfolio case study, not paid work for Olist or a claim of implemented business impact.

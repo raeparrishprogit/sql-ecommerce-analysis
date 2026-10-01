@@ -15,3 +15,4 @@ SELECT 'delivered_orders_missing_dates', COUNT(*) FROM orders WHERE order_status
 AND (date(order_delivered_customer_date) IS NULL OR date(order_estimated_delivery_date) IS NULL)
 UNION ALL
 SELECT 'missing_or_nonpositive_item_prices', COUNT(*) FROM order_items WHERE price IS NULL OR CAST(price AS REAL) <= 0;
+
